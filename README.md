@@ -2,7 +2,6 @@
 
 ![Python](https://img.shields.io/badge/Python-3.13+-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)
-![License](https://img.shields.io/badge/License-GPLv3-green.svg)
 
 **OCI Sentinel** is a free, open-source Windows desktop application developed by **Oakshift Software** on behalf of the **Orbital Conservation Institute (OCI)**.
 
