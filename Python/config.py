@@ -10,10 +10,10 @@ DB_FILE = BASE_DIR / "data" / "oci_sentinel.db"
 SETTINGS_FILE = BASE_DIR / "data" / "settings.json"
 APP_NAME = "OCI Sentinel"
 APP_VERSION = "1.1.1"
-APP_ICON_PATH = BASE_DIR / "assets" / "oci_blue.png"
-DATA_PULLS_PER_DAY = 10  # CelesTrak rate limit is 10 requests per 24 hours
+APP_ICON_PATH = BASE_DIR / "assets" / "oci_sentinel.png"
+DATA_PULLS_PER_DAY = 10
 
-CELESTRAK_RATE_LIMIT = int(DATA_PULLS_PER_DAY / 1440)  # minutes between requests
+CELESTRAK_RATE_LIMIT = int(DATA_PULLS_PER_DAY / 1440)
 
 CELESTRAK_DATA_GROUPS = {
     "debris": {

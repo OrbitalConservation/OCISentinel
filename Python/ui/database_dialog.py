@@ -82,7 +82,7 @@ class DatabaseDialog(QDialog):
                 self.table.removeRow(row)
 
         self.load_items()
-        # inform main window log if available
+        
         try:
             parent = self.parent()
             if parent is not None and hasattr(parent, "log_dialog"):

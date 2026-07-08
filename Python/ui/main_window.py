@@ -97,11 +97,12 @@ class MainWindow(QMainWindow):
         self.visualization.show_debug_overlay = self.settings.show_debug_overlay
         self.visualization.plot_progress.connect(self._on_plot_progress)
         self.visualization.plot_complete.connect(self._on_plot_complete)
-        # apply rendering preferences from settings
+        
         try:
             self.visualization.render_all_positions = bool(self.settings.render_all_positions)
         except Exception:
             self.visualization.render_all_positions = False
+        
         self.visualization.max_render_points = 5000
         self.current_positions: list[dict] = []
 
@@ -177,7 +178,7 @@ class MainWindow(QMainWindow):
         self._create_menu()
         self.refresh_object_list()
         self._start_auto_refresh()
-        # startup behavior: refresh if enabled, otherwise plot stored cached data if available
+        
         try:
             if not self.settings.offline_mode and getattr(self.settings, "refresh_on_startup", True):
                 QTimer.singleShot(200, self.refresh_data)
@@ -340,7 +341,6 @@ QTreeView, QTableView { alternate-background-color: #f8fafc; selection-backgroun
         self.fetch_thread.start()
 
     def on_fetch_finished(self, payload: object) -> None:
-        # payload is expected to be a dict with 'objects' and 'positions'
         if self.loading_dialog is not None:
             self.loading_dialog.hide()
             self.loading_dialog = None
@@ -353,7 +353,6 @@ QTreeView, QTableView { alternate-background-color: #f8fafc; selection-backgroun
         self.current_positions = positions
         self._apply_plot_filters(positions)
 
-        # perform bulk upsert to avoid UI-blocking per-row commits
         try:
             if objects:
                 self.database.upsert_objects(objects)
@@ -361,7 +360,6 @@ QTreeView, QTableView { alternate-background-color: #f8fafc; selection-backgroun
                 if self.settings.store_tle_history and not cache_load:
                     self.database.insert_tle_history_bulk(objects)
         except Exception:
-            # fall back to per-object upsert on error
             cache_load = getattr(self.fetch_worker, "cached_objects", None) is not None
             for obj in objects:
                 try:
@@ -372,7 +370,7 @@ QTreeView, QTableView { alternate-background-color: #f8fafc; selection-backgroun
                     continue
 
         self.refresh_object_list()
-        # update visualization stats, positions, and collision risk
+
         try:
             self.visualization.set_stats(len(objects), len(positions))
             self.visualization.plot_positions(positions)
@@ -380,6 +378,7 @@ QTreeView, QTableView { alternate-background-color: #f8fafc; selection-backgroun
             # if nothing was produced, dump a small debug summary to disk for inspection
         except Exception:
             pass
+
         self.current_positions = positions
         self._update_collision_summary(positions)
         self.refresh_button.setEnabled(True)
@@ -496,14 +495,13 @@ QTreeView, QTableView { alternate-background-color: #f8fafc; selection-backgroun
                     self.fetch_worker.stop()
                 except Exception:
                     pass
-            # avoid calling into a deleted C++ object by checking validity first
+            
             try:
                 if getattr(self, "fetch_thread", None) is not None and shiboken6.isValid(self.fetch_thread):
                     if self.fetch_thread.isRunning():
                         self.fetch_thread.quit()
                         self.fetch_thread.wait(2000)
             except Exception:
-                # best-effort cleanup; ignore errors from deleted Qt wrappers
                 pass
             finally:
                 self.fetch_thread = None
@@ -551,7 +549,6 @@ QTreeView, QTableView { alternate-background-color: #f8fafc; selection-backgroun
             if search_text.isdigit():
                 norad_id = int(search_text)
             else:
-                # perform a name substring search (case-insensitive)
                 objs = self.database.get_objects(name=search_text)
                 self.object_list.clear()
                 if not objs:
@@ -566,14 +563,12 @@ QTreeView, QTableView { alternate-background-color: #f8fafc; selection-backgroun
 
         self.object_list.clear()
 
-        # Helper to add object child under a parent tree item
         def _add_obj_child(parent_item: QTreeWidgetItem, obj: TrackedObject) -> None:
             count = self.database.get_tle_history_count(obj.norad_id)
             label = f"{obj.norad_id} — {obj.name} [{count}]"
             child = QTreeWidgetItem(parent_item, [label])
             child.setData(0, Qt.UserRole, obj)
 
-        # If a numeric search is provided, show only that object (if present)
         if norad_id is not None:
             obj = self.database.get_object(norad_id)
             if obj is None:
@@ -584,28 +579,23 @@ QTreeView, QTableView { alternate-background-color: #f8fafc; selection-backgroun
             top.setExpanded(True)
             return
 
-        # Build tree based on CELESTRAK_DATA_GROUPS: top-level groups and subgroups
         for top_group, submap in CELESTRAK_DATA_GROUPS.items():
-            # If user selected a specific top-level category, skip other tops
             if category != "all" and category != top_group:
                 continue
             top_item = QTreeWidgetItem(self.object_list, [top_group.capitalize()])
             top_item.setFirstColumnSpanned(True)
             for subgroup_key in submap:
-                # If default category filters subgroups directly, apply that
                 if category != "all" and category != top_group and category != subgroup_key:
                     continue
                 sub_item = QTreeWidgetItem(top_item, [subgroup_key])
                 sub_item.setFirstColumnSpanned(True)
-                # fetch objects for this subgroup (category=subgroup_key)
+                
                 objs = self.database.get_objects(category=subgroup_key)
                 for obj in objs:
                     _add_obj_child(sub_item, obj)
                 if sub_item.childCount() == 0:
-                    # remove empty subgroup
                     top_item.removeChild(sub_item)
             if top_item.childCount() == 0:
-                # if no subgroups had children, remove top
                 idx = self.object_list.indexOfTopLevelItem(top_item)
                 if idx != -1:
                     self.object_list.takeTopLevelItem(idx)
@@ -633,7 +623,6 @@ QTreeView, QTableView { alternate-background-color: #f8fafc; selection-backgroun
         history_progress = self.database.get_tle_history_count(obj.norad_id)
         self._update_prediction_progress(history_progress)
 
-        # load stored TLE history for this object and render its orbit history
         history_records = self.database.get_tle_history(obj.norad_id)
         history_orbits: list[list[tuple[float, float, float]]] = []
         last_position: dict | None = None
@@ -686,7 +675,6 @@ QTreeView, QTableView { alternate-background-color: #f8fafc; selection-backgroun
                     "Collect more TLE updates to enable trajectory projection."
                 )
 
-        # focus visualization on the selected object's NORAD
         try:
             self.visualization.set_selected_norad(obj.norad_id)
         except Exception:
@@ -724,7 +712,7 @@ QTreeView, QTableView { alternate-background-color: #f8fafc; selection-backgroun
         self.plot_loading_dialog.setWindowModality(Qt.WindowModal)
         self.plot_loading_dialog.setCancelButtonText("Cancel")
         self.plot_loading_dialog.canceled.connect(self._cancel_plot)
-        # ensure the dialog appears immediately and is responsive
+        
         try:
             self.plot_loading_dialog.setMinimumDuration(0)
             self.plot_loading_dialog.setValue(0)
@@ -807,5 +795,5 @@ QTreeView, QTableView { alternate-background-color: #f8fafc; selection-backgroun
         dlg.exec()
 
     def open_licence(self) -> None:
-        dlg = LicenseDialog(Path("Licence.txt"), self)
+        dlg = LicenseDialog(Path("assets/Licence.txt"), self)
         dlg.exec()

@@ -12,7 +12,6 @@ from config import CELESTRAK_DATA_GROUPS
 
 class CelesTrakFetcher:
     def __init__(self, verify_ssl: bool = True) -> None:
-        # CELESTRAK_DATA_GROUPS is a mapping of top-level groups to subgroup->url maps
         self.data_groups = CELESTRAK_DATA_GROUPS
         self.verify_ssl = verify_ssl
 

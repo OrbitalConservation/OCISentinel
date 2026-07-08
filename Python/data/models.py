@@ -87,7 +87,6 @@ class TrackedObject:
             )
             line2 = line2_body.ljust(68)[:68] + cls._checksum(line2_body.ljust(68)[:68])
 
-        # validate generated TLE before returning it
         ts = load.timescale()
         try:
             EarthSatellite(line1, line2, name, ts)

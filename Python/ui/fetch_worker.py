@@ -17,9 +17,9 @@ from datetime import timedelta
 
 
 class FetchWorker(QObject):
-    finished = Signal(object)  # emits a payload dict: {objects, positions}
+    finished = Signal(object)
     error = Signal(str, object)
-    progress = Signal(str, int, int)  # (phase, current, total)
+    progress = Signal(str, int, int)
 
     def __init__(
         self,
@@ -44,7 +44,6 @@ class FetchWorker(QObject):
         try:
             objects: List[TrackedObject] = []
 
-            # If cached objects were provided, use them and report per-object progress
             if self.cached_objects is not None:
                 objects = list(self.cached_objects)
                 total_objects = len(objects)
@@ -81,7 +80,6 @@ class FetchWorker(QObject):
                     except Exception:
                         pass
 
-            # Precompute simple lat/lon positions for fast UI rendering
             ts = load.timescale()
             now = ts.now()
             positions: list[dict] = []
@@ -95,7 +93,6 @@ class FetchWorker(QObject):
 
             for obj in objects:
                 if self._stopped:
-                    # emit partial result when stopped so UI can update / dismiss dialogs
                     payload = {"objects": objects, "positions": positions}
                     self.finished.emit(payload)
                     return
@@ -104,7 +101,7 @@ class FetchWorker(QObject):
                     sub = sat.at(now).subpoint()
                     lat = float(sub.latitude.degrees)
                     lon = float(sub.longitude.degrees)
-                    # use actual satellite range-based altitude instead of the subpoint elevation
+
                     try:
                         alt_km = float(sat.at(now).distance().km) - 6371.0
                     except Exception:
@@ -113,7 +110,6 @@ class FetchWorker(QObject):
                     if math.isnan(lat) or math.isnan(lon) or math.isnan(alt_km):
                         continue
 
-                    # compute simple footprint angular radius in degrees
                     from math import acos, degrees
 
                     R = 6371.0
@@ -124,7 +120,6 @@ class FetchWorker(QObject):
                     except Exception:
                         footprint_deg = 0.0
 
-                    # compute a short ground-track around the current epoch
                     track_minutes_window = 90
                     track_steps = 60
                     base_dt = now.utc_datetime()

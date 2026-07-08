@@ -1,6 +1,6 @@
 # OCI Sentinel
 
-![Python](https://img.shields.io/badge/Python-3.13+-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)
 
 **OCI Sentinel** is a free, open-source Windows desktop application developed by **Oakshift Software** on behalf of the **Orbital Conservation Institute (OCI)**.
@@ -24,6 +24,24 @@ Unlike many web-based trackers, Sentinel can optionally maintain a local histori
 - Display orbital parameters
 - Display object metadata
 - Live position updates
+
+---
+
+**Current Implementation Status**
+
+- The application currently implements live CelesTrak fetching, local caching, and an asynchronous background fetch worker with progress reporting.
+- Search supports both NORAD catalogue number and case-insensitive name substring matching.
+- Visualization provides a 2D wireframe Earth projection, colour-coded object types, individual orbit path rendering, and short-term future position projection via Skyfield propagation.
+- Settings are persisted to a JSON file and include theme selection (light/dark), fetch vs plot subgroup controls, offline mode, SSL verification toggle, and refresh scheduling.
+- A local SQLite database stores objects and TLE history; a simple Database Manager dialog allows viewing and deleting cached entries.
+
+**Planned / Not Yet Implemented**
+
+- 3D orbital visualisation, multiple map projections, zoom/pan controls, and advanced map features are not yet implemented.
+- Advanced historical datasets (velocity samples, full position history export, prediction caches) and database export/import are planned but currently incomplete.
+- Conservation analytics (OCI index, heatmaps, fragmentation timelines) and alerts are in the planned features list.
+
+If you'd like, I can (1) implement any of the planned items starting with the highest priority, or (2) further refine the README to match specific roadmap priorities.
 
 ---
 

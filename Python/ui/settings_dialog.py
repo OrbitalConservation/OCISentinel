@@ -55,6 +55,7 @@ class SettingsDialog(QDialog):
             self.render_all_checkbox.setChecked(self.settings.render_all_positions)
         except Exception:
             self.render_all_checkbox.setChecked(False)
+        
         self.plot_subgroup_checkboxes: dict[str, QCheckBox] = {}
         self.offline_checkbox = QCheckBox("Offline mode")
         self.offline_checkbox.setChecked(self.settings.offline_mode)

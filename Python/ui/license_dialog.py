@@ -25,7 +25,47 @@ class LicenseDialog(QDialog):
         body = QTextEdit()
         body.setReadOnly(True)
         try:
-            body.setPlainText(license_path.read_text(encoding="utf-8"))
+            _licence_text = """OAKSHIFT SOFTWARE / ORBITAL CONSERVATION INSTITUTE SOFTWARE LICENCE AGREEMENT
+
+1. DEFINITIONS
+"Software" means the OCI Sentinel application and associated code, documentation, and resources.
+"Provider" means Oakshift Software and the Orbital Conservation Institute (OCI).
+"User" means the individual or organization using the Software.
+
+2. LICENCE GRANT
+The Provider grants the User a perpetual, worldwide, non-exclusive, royalty-free licence to use, copy, modify, and distribute the Software for personal, educational, and research purposes.
+
+3. PERMITTED USES
+The User may:
+- install and run the Software on any compatible machine;
+- reproduce and distribute the Software in source or binary form;
+- adapt or modify the Software to suit their own needs;
+- use the Software for non-commercial academic, research, or conservation-related activities.
+
+4. RESTRICTIONS
+The User may not:
+- represent the Software as certified, endorsed, or fit for regulatory or operational decision-making;
+- remove or alter attribution notices or this licence text;
+- use the Software in a manner that violates applicable law.
+
+5. DISCLAIMER OF WARRANTY
+The Software is provided "as is" without warranty of any kind. To the maximum extent permitted by law, the Provider disclaims all warranties, whether express, implied, statutory, or otherwise, including implied warranties of merchantability, fitness for a particular purpose, accuracy, completeness, and non-infringement.
+
+6. LIMITATION OF LIABILITY
+The Provider shall not be liable for any damages arising from the use of the Software, including but not limited to direct, indirect, incidental, special, consequential, or punitive damages. This includes loss of profits, loss of data, business interruption, or any decisions made based on the Software's output.
+
+7. USER RESPONSIBILITY
+The User is solely responsible for verifying the accuracy and suitability of data and results before using them for any decision or action. The Software is intended for informational and awareness purposes only, not as a replacement for expert judgment or certified decision support.
+
+8. PUBLIC ACCESS INTENT
+This Software is provided for free public access and use by researchers, educators, and the orbital conservation community.
+
+9. SEVERABILITY
+If any provision of this Licence is held invalid or unenforceable, the remaining provisions shall remain in full force and effect.
+
+10. GOVERNING LAW
+This Licence shall be governed by the laws of the jurisdiction in which Oakshift Software and OCI are based, subject to applicable mandatory legal protections."""
+            body.setPlainText(_licence_text)
         except Exception as exc:
             body.setPlainText(f"Unable to load licence text: {exc}")
         main_layout.addWidget(body)
@@ -38,13 +78,4 @@ class LicenseDialog(QDialog):
         button_layout.addStretch(1)
         button_layout.addWidget(close_button)
         main_layout.addLayout(button_layout)
-
-        ###
-        
-        # self.setStyleSheet(
-        #     "#licenseHeader { font-size: 20px; font-weight: bold; margin-bottom: 8px; }"
-        #     "QTextEdit { background: #111827; color: #f3f4f6; border: 1px solid #4b5563; padding: 12px; }"
-        #     "QDialog { background: #0f172a; color: #f3f4f6; }"
-        #     "QPushButton { min-height: 36px; padding: 8px 16px; }"
-        # )
         

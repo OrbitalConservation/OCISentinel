@@ -16,7 +16,7 @@ class VisualizationWidget(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        # positions: list of dicts with keys: lat, lon, norad_id, name
+        
         self.positions: list[dict] = []
         self.selected_norad: int | None = None
         self.selected_history_orbits: list[list[tuple[float, float, float]]] = []
@@ -29,7 +29,6 @@ class VisualizationWidget(QWidget):
         self.animation_timer.timeout.connect(self._advance_rotation)
         self.animation_timer.start(60)
 
-        # progressive rendering controls
         self.render_all_positions: bool = False
         self.max_render_points: int = 5000
         self._full_positions: list[dict] = []
@@ -61,7 +60,6 @@ class VisualizationWidget(QWidget):
         y = math.sin(lat_rad)
         z = math.cos(lat_rad) * math.sin(lon_rad)
 
-        # rotate around the vertical axis for animation
         cos_a = math.cos(self.rotation_angle)
         sin_a = math.sin(self.rotation_angle)
         xr = x * cos_a - z * sin_a
@@ -116,7 +114,7 @@ class VisualizationWidget(QWidget):
                     if len(segment) >= 2:
                         painter.drawPolyline(segment)
                     segment = QPolygonF()
-                # near poles longitude rapidly flips and can draw tangled caps
+                
                 if (abs(prev_lat) > 80.0 or abs(lat) > 80.0) and lon_diff > 35.0:
                     if len(segment) >= 2:
                         painter.drawPolyline(segment)
@@ -169,7 +167,7 @@ class VisualizationWidget(QWidget):
                     if len(segment) >= 2:
                         painter.drawPolyline(segment)
                     segment = QPolygonF()
-                # near poles longitude rapidly flips and can draw tangled caps
+                
                 if (abs(prev_lat) > 80.0 or abs(lat) > 80.0) and lon_diff > 35.0:
                     if len(segment) >= 2:
                         painter.drawPolyline(segment)
@@ -200,12 +198,10 @@ class VisualizationWidget(QWidget):
 
         painter.fillRect(0, 0, width, height, QColor(10, 18, 34))
 
-        # globe fill for better visual contrast
         painter.setBrush(QColor(15, 30, 80, 220))
         painter.setPen(Qt.NoPen)
         painter.drawEllipse(center_x - radius, center_y - radius, radius * 2, radius * 2)
 
-        # rotating globe wireframe
         wire_pen = QPen(QColor(140, 190, 255, 180), 1)
         painter.setPen(wire_pen)
         painter.setBrush(Qt.NoBrush)
@@ -252,21 +248,18 @@ class VisualizationWidget(QWidget):
                             selected_pos = pos
                             break
                     except Exception:
-                        # fallback to string comparison
                         if str(pos.get("norad_id", "")).strip() == str(self.selected_norad).strip():
                             selected_pos = pos
                             break
             except Exception:
                 continue
 
-        # if selection exists but no exact position record found, fall back to last known position
         if self.selected_norad is not None and selected_pos is None and self.selected_last_position is not None:
             selected_pos = self.selected_last_position
 
         point_radius = 5
         painter.setBrush(Qt.NoBrush)
 
-    # draw all objects with category-based colours, but omit the selected object
         for pos in self.positions:
             try:
                 if selected_pos is not None:
@@ -323,7 +316,6 @@ class VisualizationWidget(QWidget):
                 pass
 
         if self.selected_history_orbits:
-            # choose history colour depending on whether selected object appears to be active
             try:
                 cat = str(selected_pos.get("category", "")).lower() if selected_pos is not None else ""
             except Exception:
@@ -434,12 +426,10 @@ class VisualizationWidget(QWidget):
             return False
 
     def plot_positions(self, positions: Iterable[dict]) -> None:
-        # prepare full position list, applying validity filter
         pos_list = [position for position in positions if self._is_valid_position(position)]
         self._full_positions = pos_list
         self._render_index = 0
 
-        # preserve the selected object in the downsampled rendering set
         selected_position: dict | None = None
         if self.selected_norad is not None:
             for position in pos_list:
@@ -452,23 +442,20 @@ class VisualizationWidget(QWidget):
                         selected_position = position
                         break
 
-        # decide downsampling if not rendering all
         if not self.render_all_positions and len(self._full_positions) > self.max_render_points:
             step = max(1, len(self._full_positions) // self.max_render_points)
             self._full_positions = self._full_positions[::step]
             if selected_position is not None and selected_position not in self._full_positions:
                 self._full_positions.append(selected_position)
 
-        # set batch size proportional to remaining count (kept conservative)
         remaining = len(self._full_positions)
         self._render_batch_size = max(100, min(800, remaining // 30))
-        # reset positions and stats and start progressive rendering
+        
         self.positions = []
         self.stats["positions"] = 0
         if self._render_timer.isActive():
             self._render_timer.stop()
         if self._full_positions:
-            # slightly slower tick to give the event loop breathing room
             self._render_timer.start(25)
         else:
             self.update()
@@ -482,8 +469,6 @@ class VisualizationWidget(QWidget):
         self.positions.extend(self._full_positions[self._render_index:end])
         self._render_index = end
         self.stats["positions"] = len(self.positions)
-        self._render_batch_counter += 1
-        # emit progress and repaint periodically to reduce UI load
         self._render_batch_counter += 1
         if self._render_batch_counter % 5 == 0 or self._render_index >= len(self._full_positions):
             try:
