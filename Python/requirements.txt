@@ -1,0 +1,8 @@
+PySide6>=6.6.0
+requests>=2.31.0
+skyfield>=1.54
+sgp4>=2.4.0
+matplotlib>=3.8.0
+cartopy>=0.21.1
+pyproj>=3.6.0
+numpy>=1.26.0

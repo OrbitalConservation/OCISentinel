@@ -1,0 +1,24 @@
+{
+  "archive_enabled": true,
+  "store_tle_history": true,
+  "store_position_history": true,
+  "auto_refresh": false,
+  "refresh_on_startup": false,
+  "update_frequency_minutes": 144,
+  "offline_mode": false,
+  "default_category": "all",
+  "theme": "light",
+  "verify_ssl": false,
+  "show_debug_overlay": true,
+  "enabled_data_subgroups": [
+    "fengyun-1c-debris",
+    "iridium-33-debris",
+    "cosmos-2251-debris"
+  ],
+  "enabled_plot_subgroups": [
+    "fengyun-1c-debris",
+    "iridium-33-debris",
+    "cosmos-2251-debris"
+  ],
+  "render_all_positions": false
+}
